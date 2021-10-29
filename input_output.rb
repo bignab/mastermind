@@ -98,6 +98,7 @@ end
 # Module covering all input and output methods for the mastermind game.
 module InputAndOutput
   def welcome_message
+    system 'clear'
     puts 'Hello, and welcome to a friendly game of Mastermind!'
     puts 'We would like to remind you of the rules of the game:'
   end
@@ -106,6 +107,52 @@ module InputAndOutput
     puts 'Please type four numbers between (inclusive) 1 and 6 representing the following colors:'
     puts ' 1 '.bg_red + ' ' + ' 2 '.bg_yellow + ' ' + ' 3 '.bg_blue + ' ' + ' 4 '.bg_green + ' ' + ' 5 '.bg_magenta + ' ' + ' 6 '.bg_gray
     gets.chomp.gsub(/\s+/, '').split('')
+  end
+
+  def print_current_board(code_rows)
+    system 'clear'
+    code_rows.each do |code_row|
+      print_code_row(code_row) if code_row.completed == true
+      puts '' if code_row.completed == true
+    end
+  end
+
+  def win_message
+    puts 'Congratulations, you won!'
+  end
+
+  def lose_message
+    puts 'Sorry, you lost!'
+  end
+
+  def print_code_row(code_row)
+    outputs = []
+    code_row.code_balls.each do |code_ball|
+      outputs.push(give_colour_to_number(code_ball))
+    end
+    code_row.hint_balls.each do |hint_ball|
+      outputs.push(give_colour_to_hint(hint_ball))
+    end
+    puts "#{outputs[0]} #{outputs[1]} #{outputs[2]} #{outputs[3]} | #{outputs[4]} #{outputs[5]} #{outputs[6]} #{outputs[7]}"
+  end
+
+  def give_colour_to_number(code_ball)
+    case code_ball.colour
+    when 1 then ' 1 '.bg_red
+    when 2 then ' 2 '.bg_yellow
+    when 3 then ' 3 '.bg_blue
+    when 4 then ' 4 '.bg_green
+    when 5 then ' 5 '.bg_magenta
+    when 6 then ' 6 '.bg_gray
+    end
+  end
+
+  def give_colour_to_hint(hint_ball)
+    case hint_ball.state
+    when 0 then '   '.bg_black
+    when 1 then '   '.bg_cyan
+    when 2 then '   '.bg_red
+    end
   end
 
   def valid_input?(input)

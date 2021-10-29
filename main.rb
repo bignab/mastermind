@@ -22,9 +22,13 @@ class GameBoard
     @code_rows.each do |row|
       play_row(row) # add IO from player
       compare_row_to_master(row)
-      win_event if @win_condition == true
+      print_current_board(@code_rows)
+      if @win_condition
+        win_event
+        break
+      end
     end
-    lose_event
+    lose_event unless @win_condition
   end
 
   # Method to fill in a CodeRow and all of its 4 CodeBalls
@@ -44,8 +48,10 @@ class GameBoard
     row.code_balls.each_with_index do |code_ball, index|
       colour_location_match += 1 if code_ball.colour == @master_code.code_balls[index].colour
     end
+    colour_only_match -= colour_location_match
     row.enter_full_hint(create_hint_row(colour_location_match, colour_only_match))
-    win_event if colour_location_match == 4 # Execute #win_event if all colours and locations match
+    row.completed = true
+    @win_condition = true if colour_location_match == 4 # Execute #win_event if all colours and locations match
   end
 
   # Creates an array of four integers that represent the hint states (0, 1 or 2) used for the CodeRow's HintBalls
@@ -61,11 +67,12 @@ class GameBoard
 
   def tally_colour_matches(code_count, master_count)
     tally = 0
+    temp_master_count = master_count.map(&:clone)
     code_count.each do |code_colour|
-      master_count.each_with_index do |master_colour, index|
+      temp_master_count.each_with_index do |master_colour, index|
         if master_colour == code_colour
           tally += 1
-          master_count.slice!(index)
+          temp_master_count.slice!(index)
           break
         end
       end
@@ -75,20 +82,24 @@ class GameBoard
 
   def win_event
     # add win event stuff here
+    win_message
   end
 
   def lose_event
     # add lose event stuff here
+    lose_message
   end
 end
 
 # Represents each row of 4 CodeBalls and 4 HintBalls which will be used for one round of the game.
 class CodeRow
   attr_reader :code_balls, :hint_balls
+  attr_accessor :completed
 
   def initialize
     @code_balls = Array.new(4) { CodeBall.new }
     @hint_balls = Array.new(4) { HintBall.new }
+    @completed = false
   end
 
   def change_ball_colour(colour, ball)
@@ -146,5 +157,5 @@ class HintBall
   end
 end
 
-testboard = GameBoard.new(5, [2, 3, 2, 1])
+testboard = GameBoard.new(5, [1, 5, 2, 6])
 testboard.game_loop
